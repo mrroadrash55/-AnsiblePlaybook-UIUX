@@ -1,0 +1,19 @@
+---
+-
+  hosts: "UIUX_Server"
+  name: "Disabling or Stopping UIUX"
+  tasks:
+    - name: "Stopping PM2 Service"
+      command: "pm2 stop {{ customer_env }}"
+      args:
+        chdir: /opt/PM2/UIUX_Deployments/
+      become: yes
+
+    - name: pm2 status
+      shell: pm2 status | grep {{ customer_env }}
+      become: yes
+      register: pm2_status
+    - debug: var=pm2_status.stdout_lines
+...
+
+
