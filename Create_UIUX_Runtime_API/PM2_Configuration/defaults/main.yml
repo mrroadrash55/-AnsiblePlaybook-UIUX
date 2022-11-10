@@ -1,0 +1,5 @@
+---
+script_path: /opt/PM2/UIUX_Deployments/{{ cust_folder }}/server/
+error_path: /opt/PM2/Logs/{{ cust_folder }}/err.log
+out_path: /opt/PM2/Logs/{{ cust_folder }}/out.log
+mongo_connection: mongodb://pro_user:welcome*1@10.100.16.52:27017/?authSource=sessions

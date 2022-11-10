@@ -1,0 +1,72 @@
+---
+ #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='PM2_Configuration.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='INPROGRESS';"
+
+ - name: script
+   shell: "if [ -d '/opt/PM2/UIUX_Deployments/{{ cust_folder }}/server/' ];then echo 'Directory /opt/PM2/UIUX_Deployments/{{ cust_folder }}/server/ exists' && exit 1; fi"
+
+ - name: create workspace directory
+   file:
+     path: /opt/PM2/UIUX_Deployments/{{ cust_folder }}/server/
+     state: directory
+
+ - name: create Log folder
+   file:
+     path: /opt/PM2/Logs/{{ cust_folder }}/
+     state: directory
+ 
+ - name: 'Checking if the PM2 conf is new'
+   shell: cat "/opt/PM2/UIUX_Deployments/ecosystem.config.js" |  grep -iwc "name"
+   register: count
+   ignore_errors: yes
+
+ - debug:
+     var: count.stdout_lines
+
+ - name: Remove the content for the new configuration
+   file:
+     state: absent
+     path: /opt/PM2/UIUX_Deployments/ecosystem.config.js
+   when: count is failed
+
+ - name: 'Copying PM2 template to PM2 root path for new configuration'
+   template:
+     src: ecosystem.j2
+     dest: /opt/PM2/UIUX_Deployments/ecosystem.config.js
+   become: yes
+   when: count is failed
+
+ - name: 'Copying PM2 conf template to PM2 root path for Existing Configuration'
+   ansible.builtin.blockinfile:
+     dest: /opt/PM2/UIUX_Deployments/ecosystem.config.js
+     marker_begin: "BEGIN {{ customer_env }}"
+     marker_end: "END {{ customer_env }}"
+     marker: "//{mark} configuration"
+     block: "{{ lookup('template', 'add.j2') }}"
+     insertbefore: "]"
+   when: count is succeeded
+
+ - debug: var=script_path
+
+ #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET ENDDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='PM2_Configuration.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='COMPLETED';"
+ - name: 'Copying Server.js template to server path for new configuration'
+   template:
+     src: serverjs.j2
+     dest: /opt/PM2/UIUX_Deployments/{{ cust_folder }}/server/server.js
+   become: yes
+ 
+ - name: "Starting PM2 Service"
+   ansible.builtin.command: "pm2 start ecosystem.config.js --only {{ customer_env }} --env development"
+   args:
+     chdir: /opt/PM2/UIUX_Deployments/
+   become: yes
+
+ - name: pm2 status
+   become: yes
+   shell: pm2 status | grep {{ customer_env }}
+   register: output
+ - debug: var=output.stdout_lines
+  
+
+
+
+   

@@ -1,0 +1,25 @@
+module.exports = {
+  apps : [{
+    name : '{{ customer_env }}',
+    script: 'server.js',
+    watch: true,
+    cwd : '{{ script_path }}',
+    error_file : '{{ error_path }}',
+    out_file : '{{ out_path }}',
+    time : true,
+    env_development : {
+       "NODE_ENV": "development",
+        "PORT"   : "{{ pm2_free_port }}",
+        "ADDRESS": "{{ ip }}",
+        "ENVIRONMENT" : "{{ env_id }}",
+        "MODE" : "LIVE",
+        "DBSTORE" : "true",
+        "OWNERID" : "{{ owner_id }}",
+        "MONGO_CONNECTION" : "{{ mongo_connection }}",
+        "RESOURCEURL" : "{{ resource_url }}",
+        "RESOURCETOKEN" : "{{ resource_token }}",
+    }
+        }
+        ]
+};
+

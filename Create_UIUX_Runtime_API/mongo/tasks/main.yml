@@ -1,0 +1,77 @@
+---
+
+     - name: update yum
+       ansible.builtin.yum:
+         name: yum-utils
+         state: present
+
+     - name: add docker repo
+       shell: yum-config-manager \ --add-repo \ https://download.docker.com/linux/centos/docker-ce.repo
+
+     - name: install docker
+       ansible.builtin.yum:
+         name:
+           - docker-ce
+           - docker-ce-cli
+           - containerd.io
+
+     - name: Start service docker
+       ansible.builtin.service:
+         name: docker
+         state: started
+
+     - name: Enable service docker
+       ansible.builtin.service:
+         name: docker
+         enabled: yes
+
+     - name: install docker-compose
+       ansible.builtin.get_url:
+         url: https://github.com/docker/compose/releases/download/1.29.2/docker-compose-linux-x86_64
+         dest: /usr/local/bin/docker-compose
+         mode: '0755'
+
+     - name: Create a symbolic link
+       ansible.builtin.file:
+         src: /usr/local/bin/docker-compose
+         dest: /usr/bin/docker-compose
+         state: link
+
+     - name: Create directory
+       ansible.builtin.file:
+         path: "{{ item }}"
+         state: directory
+       with_items:
+         - '/opt/solartis-mongo'
+         - '/opt/solartis-mongo/db'
+         - '/opt/solartis-mongo/configdb'
+         - '/home/UIUX'
+     - name: docker-compose file
+       template:
+         src: docker-compose.j2
+         dest: /home/docker-compose.yaml
+       become: yes
+
+     - name: 'mongosh package'
+       template:
+         src: mongosh.j2
+         dest: /etc/yum.repos.d/mongodb-org-5.0.repo
+
+     - name: 'install mongosh'
+       ansible.builtin.yum:
+         name: mongodb-mongosh
+         state: present
+
+     - name: docker-compose up
+       shell: docker-compose -f /home/docker-compose.yaml up -d
+       become: yes
+
+     - name: create db 
+       shell: mongosh --host 10.100.16.52 --port 27017 -u root -p welcome*1 --eval "use sessions;" 
+
+     - name: create user
+       shell: mongosh -u root -p welcome*1 --host 10.100.16.52 --port 27017 --eval "db.createUser({user:'sol_user', pwd:'sol_user*1', roles:[{role:'readWrite', db:'sessions'}]})"
+
+        
+
+   

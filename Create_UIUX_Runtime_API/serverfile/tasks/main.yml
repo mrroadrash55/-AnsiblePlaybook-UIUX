@@ -1,0 +1,21 @@
+---
+ - name: install modules
+   shell: npm install express --save
+   shell: npm install express-session --save
+   shell: npm install mysql --save 
+
+ - name: 'Copying Server.js template to server path for new configuration'
+   template:
+     src: serverjs.j2
+     dest: /opt/UIUX_Deployments/{{ cust_folder }}/server/server.js
+
+ - name: 'Copying style.css template to server path for new configuration'
+   template:
+     src: stylecss.j2
+     dest: /opt/UIUX_Deployments/{{ cust_folder }}/server/style.css
+
+ - name: 'Copying login.html template to server path for new configuration'
+   template:
+     src: loginhtml.j2
+     dest: /opt/UIUX_Deployments/{{ cust_folder }}/server/login.html 
+

@@ -1,0 +1,27 @@
+---
+# -
+#   name: NODEJS,PM2 and NGINX - INSTALLATION and CONFIGURATION
+#   hosts: localhost
+# - tasks:
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='pm2_check.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='INPROGRESS';"
+
+
+     - name: Check if pm2 already installed
+       shell: pm2 -v
+       register: pm2_ver
+       ignore_errors: True
+
+     - name: When pm2 is already installed
+       debug: msg="pm2 is already installed"
+       when: pm2_ver is succeeded
+
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='pm2_check.yml' AND ENVIRONMENT='{{ envi }}';"
+ 
+     - name: Install pm2
+       include: pm2_install.yml
+       when: pm2_ver is failed
+       #shell: echo "Going to install pm2"        
+      
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET ENDDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='pm2_check.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='COMPLETED;"
+
+

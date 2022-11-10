@@ -1,0 +1,25 @@
+---
+# - name: install nodejs
+#   hosts: localhost
+#   become: true
+# - tasks:
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='nodejs_check.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='INPROGRESS';"
+
+     - name: Check if node already installed
+       shell: node -v
+       register: node_ver
+       ignore_errors: True
+
+     - name: When Node is already installed
+       debug: msg="Node is already installed"
+       when: node_ver is succeeded
+
+     #- meta: end_play
+     #  when: node_ver is succeeded
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='nodejs_check.yml' AND ENVIRONMENT='{{ envi }}';" 
+     
+     - name: Install nodejs
+       include: nodejs_install.yml
+       when: node_ver is failed
+     
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET ENDDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='nodejs_check.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='COMPLETED';"

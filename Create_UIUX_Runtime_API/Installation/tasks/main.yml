@@ -1,0 +1,9 @@
+---
+  - name: 'Install NODE,PM2,NGINX'
+    include_tasks: "{{ item }}"
+    loop:
+      - nodejs_check.yml
+      - mongodb_check.yml
+      - pm2_check.yml
+      - nginx_check.yml
+   

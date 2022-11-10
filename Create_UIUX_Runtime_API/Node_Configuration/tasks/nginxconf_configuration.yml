@@ -1,0 +1,59 @@
+---
+
+    - name: 'Checking if the nginx conf is new'
+      shell: cat "/opt/nginx/conf/nginx.conf" |  grep -iwc "server"
+      register: count
+      ignore_errors: yes
+        
+    - debug: 
+        var: count.stdout_lines
+
+    - name: Remove the content for the new configuration
+      file:
+        state: absent
+        path: /opt/nginx/conf/nginx.conf
+      when: count is failed
+    
+    - name: create Log folder
+      file:
+        path: /opt/nginx/logs/{{ cust_folder }}/
+        state: directory
+
+
+    - name: 'Copying nginx.conf template to Nginx root path for new configuration'
+      template:
+        src: nginx_init.conf.j2
+        dest: /opt/nginx/conf/nginx.conf
+      become: yes
+      when: count is failed
+       
+    - name: 'Copying nginx.conf template to Nginx root path for Existing Configuration'
+      blockinfile:
+        dest: /opt/nginx/conf/nginx.conf
+        marker_begin: "{{ domain_name }}"
+        marker_end: "{{ domain_name }}"
+        marker: "# {mark} uiux configuration"
+        block: "{{ lookup('template', 'nginx_server.conf.j2') }}"       
+        insertbefore: "}"
+      when: count is succeeded
+     
+    - name: 'nginx restart'
+      shell: systemctl restart nginx
+
+    - name: 'NGINX status'
+      shell:  systemctl status nginx | grep Active
+      register: nginx_status
+    - debug: var=nginx_status.stdout_lines
+        
+
+
+
+
+
+
+
+
+
+
+
+    

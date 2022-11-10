@@ -1,0 +1,24 @@
+---
+ - name: 'UIUX - INSTALLATION and CONFIGURATION'
+   hosts: UIUX_Server
+   include_tasks: "{{ item }}"
+   loop:
+     - nodejs_install.yml 
+     - pm2_install.yml
+     - nginx_install.yml
+
+# - tasks:
+#     - name: Install NodeJS
+#       import_playbook: nodejs_install.yml
+
+ #    - name: Install PM2
+  #     import_playbook: pm2_install.yml
+
+   #  - name: Install Nginx
+    #   import_playbook: nginx_install.yml
+        
+ 
+ - roles:
+     - role: PM2_Configuration
+     - role: Node_Configuration
+     

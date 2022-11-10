@@ -1,0 +1,93 @@
+---
+# - name: NODEJS,PM2 and NGINX - INSTALLATION and CONFIGURATION
+#   hosts: localhost
+# - tasks:       
+     - name: Check whether nginx user exists
+       shell: /usr/bin/getent passwd nginx | /usr/bin/wc -l | tr -d ''
+       register: user_exist
+       
+     - debug:
+         var: user_exist.stdout_lines
+       
+     - name: Add nginx user
+       shell: useradd -d /opt/nginx/ -s /sbin/nologin nginx
+       when: user_exist.stdout == 0
+       
+
+     - name: yum install node dependency packages
+       yum:
+         name:  
+           - gcc
+           - gcc-c++
+           - make
+           - zlib-devel 
+           - pcre-devel 
+           - openssl-devel
+         state: present
+
+     - name: Create ngnix Directory
+       file:
+         path: /opt/nginx
+         state: directory
+
+     - name: Download and Extract Nginx
+       unarchive:
+         src: http://nginx.org/download/nginx-1.18.0.tar.gz
+         dest: /tmp
+         remote_src: yes
+
+     - name: Copying nginx files to opt folder
+       shell: "cp -r {{ src_path }}/. {{ dest_path }}"
+       vars: 
+         src_path: "/tmp/nginx-1.18.0/" 
+         dest_path: "/opt/nginx" 
+
+     - name: Configure Nginx
+       command: ./configure --user=nginx --group=nginx --prefix=/opt/nginx --sbin-path=/usr/sbin/nginx --conf-path=/opt/nginx/conf/nginx.conf --error-log-path=/opt/nginx/logs/error.log --http-log-path=/opt/nginx/logs/access.log --pid-path=/opt/nginx/conf/nginx.pid --lock-path=/opt/nginx/conf/nginx.lock --with-http_ssl_module --with-pcre
+       register: conf_log
+       #become: yes
+       args:
+         chdir: /opt/nginx
+          
+     - debug:
+         var: conf_log.stdout_lines
+
+     - name: run make install command
+       make:
+         chdir: /opt/nginx/
+         target: install
+       register: makeinstall_log
+      # become: yes
+      # become_user: root
+       ignore_errors: True
+ 
+     - debug:
+         var: makeinstall_log.stdout_lines
+     
+     - name: create certs directory
+       file:
+         path: /opt/nginx/certs
+         state: directory
+
+     - name: 'key file import'
+       template:
+         src: solartisnet2015_pri.key.j2
+         dest: /opt/nginx/certs/solartisnet2015_pri.key
+       become: yes
+
+     - name: 'key file import'
+       template:
+         src: solartisnet2015_pri.key.j2
+         dest: /opt/nginx/certs/solartisnet2015_pri.key
+       become: yes 
+     - name: start nginx
+       service:
+         name: nginx
+         state: started
+
+     - name: 'NGINX status'
+       shell:  systemctl status nginx | grep Active
+       register: nginx_status
+     - debug: var=nginx_status.stdout_lines
+
+   

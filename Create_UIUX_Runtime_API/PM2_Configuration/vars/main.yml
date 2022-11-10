@@ -1,0 +1,7 @@
+---
+env_id: "{{ env_id }}" 
+owner_id: "{{ own_id }}"
+resource_url: "{{ resource_url }}"
+resource_token: "{{ resource_token }}"
+cust_folder: "{{ cust_folder }}"
+#master_host: "{{ ip }}"

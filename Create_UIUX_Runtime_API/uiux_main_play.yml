@@ -1,0 +1,17 @@
+---
+-
+   name: UIUX INSTALLATION AND CONFIGURATION
+   hosts: UIUX_Server
+   become: yes
+   #tasks:
+     #- command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET STARTDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='uiux_main_play.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='INPROGRESS';"
+   
+   roles:
+     - role: Installation
+     - role: PM2_Configuration
+     - role: Node_Configuration
+     #- role: serverfile
+   #tasks:
+    # - command: /opt/cddb_3200/bin/mysql -N -u relusr -prelusr*1 -h 10.100.16.51 -P 3400 -D provisioningdb -e "UPDATE PROVISIONING_PROGRESS_V2 SET ENDDATE=NOW() WHERE CUSTOMER='{{ customer_name }}' AND LOB='{{ lob_name }}' AND MAIN_PLAY='{{ main_play }}' AND SUB_PLAYS='uiux_main_play.yml' AND ENVIRONMENT='{{ environment }}' AND STATUS='COMPLETED';"
+     
+

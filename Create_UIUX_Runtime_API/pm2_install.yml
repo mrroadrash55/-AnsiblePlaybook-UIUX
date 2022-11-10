@@ -1,0 +1,53 @@
+---
+# -
+#   name: NODEJS,PM2 and NGINX - INSTALLATION and CONFIGURATION
+#   hosts: localhost
+# - tasks:
+     - name: Check if pm2 already installed
+       shell: pm2 -v
+       register: pm2_ver
+       ignore_errors: True
+
+     - name: When pm2 is already installed
+       debug: msg="pm2 is already installed"
+       when: pm2_ver is succeeded
+
+     - name: Install pm2
+       when: pm2_ver is failed
+       shell: echo "Going to install pm2"        
+
+     - name: install pm2
+       shell: npm install pm2 -g && pm2 update
+     
+     - name: pm2 version
+       shell: pm2 -v
+       register: pm2
+
+     - debug:
+         var: pm2.stdout_lines
+
+     - name: Creating Softlinks
+       shell: "{{ item }}"
+       args:
+         chdir: /bin/
+         warn: false
+       with_items:
+         - ln -s /lib/node_modules/pm2/bin/pm2-docker pm2-docker
+         - ln -s /lib/node_modules/pm2/bin/pm2-dev pm2-dev
+         - ln -s /lib/node_modules/pm2/bin/pm2 pm2
+         - ln -s /lib/node_modules/pm2/bin/pm2-runtime pm2-runtime
+       ignore_errors: True
+
+     - name: Start PM2 service
+       command: pm2 startup
+       register: output
+       
+     - debug:
+         var: output.stdout_lines
+       
+     - name: Check PM2 Status
+       command: pm2 status   
+       register: pm2_status
+
+     - debug:
+         var: pm2_status.stdout_lines

@@ -1,0 +1,5 @@
+---
+cert_path: /opt/nginx/certs/solartisnet2023.crt 
+cert_key: /opt/nginx/certs/solartisnet2015_pri.key
+default_port: 443
+

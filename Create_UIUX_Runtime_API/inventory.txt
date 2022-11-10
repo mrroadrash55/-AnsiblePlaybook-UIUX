@@ -1,0 +1,2 @@
+[UIUX_Server]
+UIUX_Server ansible_host=10.100.16.51
